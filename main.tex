@@ -1,0 +1,233 @@
+\documentclass{beamer}
+
+\usepackage{bussproofs}
+
+\usepackage{amsmath}
+
+\usefonttheme[onlymath]{serif}
+
+
+\title{Types and Programming Languages} 
+\subtitle{Typed Arithmetic Expressions - Soundness}
+
+\author{Paulo Eduardo Althoff}
+\date{2017/10}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}[fragile]
+
+\frametitle {{\color{black}Typed Arithmetic Expressions} Grammar}
+
+\begin{verbatim}
+ t ::=   true
+         false 
+         if t then t else t
+         0
+         succ t
+         pred t
+         iszero t
+         
+ v ::= true 
+     | false 
+     | nv
+
+ nv ::= 0
+      | succ nv 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Evaluation Booleans} 
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-IfTrue)}
+      \UnaryInfC{$if$ $true$ $then\ t_2\ else\ t_3\ \rightarrow t_2$}
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-IfFalse)}
+      \UnaryInfC{$if\ false\ then\ t_2\ else\ t_3\ \rightarrow t_3$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{$t_1 \rightarrow t_1'$}
+      \RightLabel{\quad (E-If)}
+      \UnaryInfC{$if\ t_1\ then\ t_2\ else\ t_3\ \rightarrow if\ t_1'\ then\ t_2\ else\ t_3\ $}
+	\end{prooftree}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Evaluation NV} 
+
+\begin{columns}
+\begin{column}{0.4\textwidth}
+
+    \hspace{0.3cm}
+    \begin{prooftree}
+      \AxiomC{$t_1 \rightarrow t_1'$}
+      \RightLabel{\quad (E-IsZero)}
+      \UnaryInfC{$iszero\ t_1 \rightarrow iszero\ t_1'$}
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-IsZeroZero)}
+      \UnaryInfC{$iszero\ 0 \rightarrow true$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-IsZeroSucc)}
+      \UnaryInfC{$iszero(succ\ nv_1) \rightarrow false$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-PredSucc)}
+      \UnaryInfC{$pred(succ\ nv_1)\ \rightarrow nv_1$}
+    \end{prooftree}
+    
+    
+\end{column}
+\begin{column}{0.1\textwidth}
+\end{column}
+\begin{column}{0.4\textwidth}
+
+    \begin{prooftree}
+      \AxiomC{$t_1 \rightarrow t_1'$}
+      \RightLabel{\quad (E-Succ)}
+      \UnaryInfC{$succ\ t_1 \rightarrow succ\ t_1'$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{$t_1 \rightarrow t_1'$}
+      \RightLabel{\quad (E-Pred)}
+      \UnaryInfC{$pred\ t_1 \rightarrow pred\ t_1'$}
+    \end{prooftree}
+    
+    
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (E-PredZero)}
+      \UnaryInfC{$pred\ 0 \rightarrow 0$}
+    \end{prooftree}
+    
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{The Typing Relation} 
+Smallest binary relation between terms and types (t :T) satisfying:
+	\begin{verbatim} 
+       T ::= Bool
+           | Nat    
+	\end{verbatim}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (T-True)}
+      \UnaryInfC{$true\ : Bool$}
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (T-False)}
+      \UnaryInfC{$false\ : Bool$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{$t_1 : Bool$} 
+      \AxiomC{$t_2 : T$}
+      \AxiomC{$t_3 : T$}
+      \RightLabel{\quad (T-If)}
+      \TrinaryInfC{$if\ t_1\ then\ t_2\ else\ t_3\ : T$}
+    \end{prooftree}
+\end{column}
+\begin{column}{0.1\textwidth}
+\end{column}
+\begin{column}{0.4\textwidth}
+
+    \begin{prooftree}
+      \AxiomC{}
+      \RightLabel{\quad (T-Zero)}
+      \UnaryInfC{$0\ : Nat$}
+    \end{prooftree}
+    
+    \begin{prooftree}
+      \AxiomC{$t_1 : Nat$}
+      \RightLabel{\quad (T-Succ)}
+      \UnaryInfC{$succ\ t_1: Nat$}
+    \end{prooftree} 
+
+    \begin{prooftree}
+      \AxiomC{$t_1 : Nat$}
+      \RightLabel{\quad (T-Pred)}
+      \UnaryInfC{$pred\ t_1: Nat$}
+    \end{prooftree} 
+
+    \begin{prooftree}
+      \AxiomC{$t_1 : Nat$}
+      \RightLabel{\quad (T-IsZero)}
+      \UnaryInfC{$iszero\ t_1: Bool$}
+    \end{prooftree} 
+    \end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+
+\frametitle {Inversion of Typing Relation {\color{black}Lemma}}
+
+From definition of Typing Relation:
+
+\begin{enumerate}
+\item {$true:R \implies R=Bool$}
+\item {$false:R \implies R=Bool$}
+\item {$if$} {$ t1 $} {$then$} {$ t2 $} {$else$} {$ t3:R $} {$ \implies (t1:Bool)\land(t2:R)\land(t3:R) $}
+\item {$0:R \implies R=Nat$}
+\item {$succ$} {$ t1:R \implies (R=Nat) \land (t1:Nat)$}
+\item {$pred$} {$ t1:R \implies (R=Nat) \land (t1:Nat)$}
+\item {$iszero$} {$ t1:R \implies (R=Bool) \land (t1:Nat)$}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+\frametitle {Canonical Forms {\color{black}Lemma}}
+
+\begin{enumerate}
+\item {$v:Bool \implies (v=true) \lor (v=false)$}
+\item {$v:Nat \implies v=nv $}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \frametitle {Soundness (or Safety)}
+
+  Well typed terms not "go wrong".
+
+  \begin{itemize}
+  \item \textit{Progress}: {$t:T \implies (t=v) \lor (t \rightarrow t')$}
+  \item \textit{Preservation}: {$(t:T)\land(t\rightarrow t') \implies (t':T)$}
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+ \titlepage
+\end{frame}
+\end{document}
