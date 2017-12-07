@@ -101,13 +101,18 @@ Proof.
     apply H1.
   Qed.
 
+Lemma nv_is_nat: forall n, (nv n) -> (n : Nat).
+Proof.
+  intros. induction H. apply T_Zero. apply T_Succ. apply IHnv.
+Qed.
+
 Theorem progress : forall t T,
   t : T -> (value t) \/ (exists t', t >> t').
 Proof.
   intros. induction H.
   - (*T_True*) left. unfold value. left. apply vtrue.
   - (*T_False*) left. unfold value. left. apply vfalse.
-  - (*T_If*) right. destruct IHtc1. 
+  - (*T_If*) right. destruct IHtc1.
     + assert(CB: (t1 = true) \/ (t1 = false)).
     {
       apply canonical_bool. split. apply H2. apply H.
@@ -141,4 +146,33 @@ Proof.
       * exists true. apply E_IsZeroZero.
       * exists false. apply E_IsZeroSucc. apply H1.
     + destruct H0. exists (iszero x). apply E_IsZero. apply H0.
+  Qed.
+
+Theorem preservation : forall t T t',
+  (t : T) -> (t >> t') -> (t' : T).
+Proof.
+  intros.
+  generalize dependent t'.
+  induction H.
+    - (*T_Bool*) intros. inversion H0.
+    - (*T_False*) intros. inversion H0.
+    - (*T_If*) intros.
+      inversion H2.
+      + subst. apply H0.
+      + subst. apply H1.
+      + subst. apply T_If.
+        * apply IHtc1. apply H7.
+        * apply H0.
+        * apply H1.
+    - (*T_Zero*) intros. inversion H0.
+    - (*T_Succ*) intros. inversion H0. subst. apply T_Succ. apply IHtc. apply H2.
+    - (*T_Pred*) intros.
+        + inversion H0.
+          * subst. apply H.
+          * subst. apply nv_is_nat. apply H2.
+          * subst. apply T_Pred. apply IHtc. apply H2.
+    - (*T_IsZero*) intros. inversion H0.
+      + subst. apply T_IsZero. apply IHtc. apply H2.
+      + apply T_True.
+      + apply T_False.
   Qed.
